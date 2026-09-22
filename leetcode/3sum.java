@@ -32,45 +32,58 @@ Constraints:
 
 3 <= nums.length <= 3000
 -105 <= nums[i] <= 105*/
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 class Solution {
     List<List<Integer>> res = new ArrayList<>();
 
     public List<List<Integer>> threeSum(int[] nums) {
+        // Step 1: Sort the array so we can cleanly look for duplicates
         Arrays.sort(nums);
+        
         for (int i = 0; i < nums.length; i++) {
-            if (i == 0 || nums[i - 1] != nums[i]) {
-                twosumsorted(i + 1, nums.length - 1, nums, -nums[i]);
+            // Skip the duplicate "First Persons" so we don't get duplicate answers
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
             }
+            
+            // Step 2: Use our two pointers to find the other two numbers
+            searchPairs(nums, i);
         }
         return res;
     }
 
-    void twosumsorted(int i, int j, int nums[], int target) {
-        int a1 = nums[i - 1];
-        while (i < j) {
-            if (nums[i] + nums[j] > target) {
-                j--;
-            } else if (nums[i] + nums[j] < target) {
-                i++;
+    private void searchPairs(int[] nums, int firstIndex) {
+        int left = firstIndex + 1;    // Starts right after the first number
+        int right = nums.length - 1;  // Starts at the very end of the array
+        
+        while (left < right) {
+            int currentSum = nums[firstIndex] + nums[left] + nums[right];
+            
+            if (currentSum == 0) {
+                // Found a perfect match! Save it to the results list
+                res.add(Arrays.asList(nums[firstIndex], nums[left], nums[right]));
+                
+                left++;  // Move left pointer forward
+                right--; // Move right pointer backward
+                
+                // Skip duplicate numbers for 'left' to avoid repeating the same answer
+                while (left < right && nums[left] == nums[left - 1]) {
+                    left++;
+                }
+                // Skip duplicate numbers for 'right'
+                while (left < right && nums[right] == nums[right + 1]) {
+                    right--;
+                }
+                
+            } else if (currentSum < 0) {
+                // The sum is too small! We need a bigger number.
+                // Move the left pointer forward (to get a larger value).
+                left++;
             } else {
-                List<Integer> list = new ArrayList<>();
-                list.add(a1);
-                list.add(nums[i]);
-                list.add(nums[j]);
-                res.add(list);
-                // Skip duplicate values for 'b'
-                while (i < j && nums[i] == nums[i + 1])
-                    i++;
-                // Skip duplicate values for 'c'
-                while (i < j && nums[j] == nums[j - 1])
-                    j--;
-                i++;
-                j--;
+                // The sum is too big! We need a smaller number.
+                // Move the right pointer backward (to get a smaller value).
+                right--;
             }
         }
     }
